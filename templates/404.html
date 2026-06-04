@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 — She Can Foundation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <style>
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem}
+    .err-wrap{max-width:500px}
+    .err-num{font-family:'Playfair Display',serif;font-size:clamp(6rem,20vw,12rem);line-height:1;background:linear-gradient(135deg,#c94b8a,#7b3fa0);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .err-msg{font-size:1.25rem;color:var(--text-muted,#888);margin-bottom:2rem}
+    .err-link{display:inline-block;padding:.75rem 2rem;background:linear-gradient(135deg,#c94b8a,#7b3fa0);color:#fff;border-radius:3rem;text-decoration:none;font-weight:600;transition:transform .2s,box-shadow .2s}
+    .err-link:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,75,138,.4)}
+  </style>
+</head>
+<body>
+  <div class="err-wrap">
+    <div class="err-num">404</div>
+    <p class="err-msg">This page doesn't exist — but your potential does.</p>
+    <a href="/" class="err-link">← Back to She Can</a>
+  </div>
+</body>
+</html>

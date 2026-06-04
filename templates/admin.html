@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — She Can Foundation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}"/>
+  <link rel="icon" type="image/avif" href="{{ url_for('static', filename='images/she.avif') }}" />
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sb-icon" aria-hidden="true" style="width: 32px; height: 32px;">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="logo-clip-sb">
+              <circle cx="24" cy="24" r="22" />
+            </clipPath>
+          </defs>
+          <image href="{{ url_for('static', filename='images/she.avif') }}" x="2" y="2" width="44" height="44" clip-path="url(#logo-clip-sb)" />
+          <path d="M24 6 l1.5 4.6h4.8l-3.9 2.8 1.5 4.6L24 15.2l-3.9 2.8 1.5-4.6-3.9-2.8h4.8z" fill="#FFD700"/>
+        </svg>
+      </div>
+      <div>
+        <span class="sb-title">She Can</span>
+        <span class="sb-sub">Admin Panel</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Admin navigation">
+      <a href="/admin" class="sn-item active" aria-current="page">
+        <span class="sn-icon">⊞</span> Dashboard
+      </a>
+      <a href="/admin?q=" class="sn-item">
+        <span class="sn-icon">✉</span> All Messages
+      </a>
+      <a href="/admin/export" class="sn-item">
+        <span class="sn-icon">⤓</span> Export CSV
+      </a>
+      <a href="/" class="sn-item" target="_blank" rel="noopener">
+        <span class="sn-icon">↗</span> Public Site
+      </a>
+      <a href="/logout" class="sn-item">
+        <span class="sn-icon">⎋</span> Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sf-avatar" aria-hidden="true">A</div>
+      <div>
+        <span class="sf-name">Administrator</span>
+        <span class="sf-role">She Can Foundation</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="admin-main" id="main-content">
+
+    <!-- Top bar -->
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" aria-label="Toggle sidebar" id="sidebar-toggle">☰</button>
+        <h1 class="page-title">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-date" id="current-date"></span>
+        <a href="/admin/export" class="export-btn" aria-label="Export to CSV">
+          <span>⤓</span> Export CSV
+        </a>
+      </div>
+    </header>
+
+    <!-- Stats Row -->
+    <section class="stats-row" aria-label="Dashboard statistics">
+      <article class="stat-card sc-total">
+        <div class="sc-icon" aria-hidden="true">✉</div>
+        <div class="sc-body">
+          <span class="sc-num">{{ stats.total }}</span>
+          <span class="sc-label">Total Submissions</span>
+        </div>
+        <div class="sc-sparkline" aria-hidden="true"></div>
+      </article>
+
+      <article class="stat-card sc-today">
+        <div class="sc-icon" aria-hidden="true">☀</div>
+        <div class="sc-body">
+          <span class="sc-num">{{ stats.today }}</span>
+          <span class="sc-label">Today</span>
+        </div>
+      </article>
+
+      <article class="stat-card sc-week">
+        <div class="sc-icon" aria-hidden="true">📅</div>
+        <div class="sc-body">
+          <span class="sc-num">{{ stats.this_week }}</span>
+          <span class="sc-label">This Week</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- Search + Table -->
+    <section class="table-section">
+      <div class="table-toolbar">
+        <form class="search-form" method="GET" action="/admin" role="search" aria-label="Search submissions">
+          <div class="search-wrap">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              name="q"
+              class="search-input"
+              placeholder="Search by name, email or message…"
+              value="{{ search }}"
+              aria-label="Search submissions"
+            />
+          </div>
+          <button type="submit" class="search-btn">Search</button>
+          {% if search %}
+            <a href="/admin" class="clear-btn" aria-label="Clear search">✕ Clear</a>
+          {% endif %}
+        </form>
+
+        <span class="result-count" aria-live="polite">
+          {% if search %}
+            {{ total }} result{{ 's' if total != 1 }} for "<em>{{ search }}</em>"
+          {% else %}
+            {{ total }} submission{{ 's' if total != 1 }} total
+          {% endif %}
+        </span>
+      </div>
+
+      {% if submissions %}
+      <div class="table-wrapper" role="region" aria-label="Submissions table" tabindex="0">
+        <table class="submissions-table" aria-label="Contact form submissions">
+          <thead>
+            <tr>
+              <th scope="col" class="col-id">#</th>
+              <th scope="col" class="col-name">Name</th>
+              <th scope="col" class="col-email">Email</th>
+              <th scope="col" class="col-msg">Message</th>
+              <th scope="col" class="col-date">Date</th>
+              <th scope="col" class="col-action">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sub in submissions %}
+            <tr class="sub-row" data-id="{{ sub.id }}">
+              <td class="col-id mono">#{{ sub.id }}</td>
+              <td class="col-name">
+                <div class="sub-avatar" aria-hidden="true">{{ sub.name[0].upper() }}</div>
+                <span class="sub-name">{{ sub.name }}</span>
+              </td>
+              <td class="col-email">
+                <a href="mailto:{{ sub.email }}" class="email-link">{{ sub.email }}</a>
+              </td>
+              <td class="col-msg">
+                <div class="msg-preview" title="{{ sub.message }}">
+                  {{ sub.message[:80] }}{% if sub.message|length > 80 %}…{% endif %}
+                </div>
+              </td>
+              <td class="col-date mono">
+                <span class="date-badge">{{ sub.created_at[:16] }}</span>
+              </td>
+              <td class="col-action">
+                <button
+                  class="delete-btn"
+                  data-id="{{ sub.id }}"
+                  data-name="{{ sub.name }}"
+                  aria-label="Delete submission from {{ sub.name }}"
+                >✕ Delete</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+      <nav class="pagination" aria-label="Pagination">
+        {% if page > 1 %}
+          <a href="/admin?q={{ search }}&page={{ page - 1 }}" class="pg-btn" aria-label="Previous page">‹ Prev</a>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+          {% if p == page %}
+            <span class="pg-btn pg-current" aria-current="page">{{ p }}</span>
+          {% elif p <= 3 or p >= total_pages - 1 or (p >= page - 1 and p <= page + 1) %}
+            <a href="/admin?q={{ search }}&page={{ p }}" class="pg-btn">{{ p }}</a>
+          {% elif p == 4 or p == total_pages - 2 %}
+            <span class="pg-ellipsis">…</span>
+          {% endif %}
+        {% endfor %}
+
+        {% if page < total_pages %}
+          <a href="/admin?q={{ search }}&page={{ page + 1 }}" class="pg-btn" aria-label="Next page">Next ›</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state" aria-live="polite">
+        <div class="es-icon" aria-hidden="true">📭</div>
+        <h2 class="es-title">
+          {% if search %}No results found{% else %}No submissions yet{% endif %}
+        </h2>
+        <p class="es-body">
+          {% if search %}
+            Try a different search term or <a href="/admin">view all</a>.
+          {% else %}
+            Form submissions will appear here once visitors start reaching out.
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+
+    </section><!-- /table-section -->
+  </main><!-- /admin-main -->
+
+  <!-- ── Delete Confirmation Modal ── -->
+  <div class="del-overlay" id="del-overlay" hidden role="dialog" aria-modal="true" aria-label="Confirm deletion">
+    <div class="del-modal">
+      <div class="del-icon" aria-hidden="true">⚠</div>
+      <h2 class="del-title">Delete Submission?</h2>
+      <p class="del-body">This will permanently delete the message from <strong id="del-name"></strong>. This action cannot be undone.</p>
+      <div class="del-actions">
+        <button class="del-cancel" id="del-cancel">Cancel</button>
+        <button class="del-confirm" id="del-confirm">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>
